@@ -45,7 +45,6 @@ namespace matplotlibcpp
 {
     namespace detail
     {
-
         static std::string s_backend;
 
         struct _interpreter
@@ -164,17 +163,14 @@ namespace matplotlibcpp
             }
 
 #  else
-
             void import_numpy() {
                 import_array(); // initialize C-API
             }
-
 #  endif
 #endif
 
             _interpreter()
             {
-
                 // optional but recommended
 #if PY_MAJOR_VERSION >= 3
                 wchar_t name[] = L"plotting";
@@ -229,17 +225,23 @@ namespace matplotlibcpp
                 PyObject * pymod = PyImport_Import(pyplotname);
                 Py_DECREF(pyplotname);
                 if(!pymod)
-                { throw std::runtime_error("Error loading module matplotlib.pyplot!"); }
+                {
+                    throw std::runtime_error("Error loading module matplotlib.pyplot!");
+                }
 
                 s_python_colormap = PyImport_Import(cmname);
                 Py_DECREF(cmname);
                 if(!s_python_colormap)
-                { throw std::runtime_error("Error loading module matplotlib.cm!"); }
+                {
+                    throw std::runtime_error("Error loading module matplotlib.cm!");
+                }
 
                 PyObject * pylabmod = PyImport_Import(pylabname);
                 Py_DECREF(pylabname);
                 if(!pylabmod)
-                { throw std::runtime_error("Error loading module pylab!"); }
+                {
+                    throw std::runtime_error("Error loading module pylab!");
+                }
 
                 s_python_function_arrow = safe_import(pymod, "arrow");
                 s_python_function_show = safe_import(pymod, "show");
@@ -344,14 +346,14 @@ namespace matplotlibcpp
         Py_DECREF(args);
         Py_DECREF(kwargs);
 
-        if(res) Py_DECREF(res);
+        if(res)
+            Py_DECREF(res);
 
         return res;
     }
 
     namespace detail
     {
-
 #ifndef WITHOUT_NUMPY
 // Type selector for numpy array conversion
         template<typename T>
@@ -450,7 +452,6 @@ namespace matplotlibcpp
             return varray;
         }
 
-
         template<typename Numeric>
         PyObject *get_2darray(const std::vector<::std::vector<Numeric>> &v)
         {
@@ -476,7 +477,6 @@ namespace matplotlibcpp
         }
 
 #else // fallback if we don't have numpy: copy every element of the given vector
-
         template<typename Numeric>
         PyObject* get_array(const std::vector<Numeric>& v)
         {
@@ -486,7 +486,6 @@ namespace matplotlibcpp
             }
             return list;
         }
-
 #endif // WITHOUT_NUMPY
 
 // sometimes, for labels and such, we need string arrays
@@ -952,7 +951,8 @@ namespace matplotlibcpp
 
         Py_DECREF(args);
         Py_DECREF(kwargs);
-        if(res) Py_DECREF(res);
+        if(res)
+            Py_DECREF(res);
 
         return res;
     }
@@ -1021,7 +1021,6 @@ namespace matplotlibcpp
 #ifndef WITHOUT_NUMPY
     namespace detail
     {
-
         inline void imshow(void *ptr, const NPY_TYPES type, const int rows, const int columns, const int colors,
                            const std::map<std::string, std::string> &keywords, PyObject **out)
         {
@@ -1045,14 +1044,12 @@ namespace matplotlibcpp
             PyObject * res = PyObject_Call(detail::_interpreter::get().s_python_function_imshow, args, kwargs);
             Py_DECREF(args);
             Py_DECREF(kwargs);
-            if(!res)
-                throw std::runtime_error("Call to imshow() failed");
+            if(!res) throw std::runtime_error("Call to imshow() failed");
             if(out)
                 *out = res;
             else
                 Py_DECREF(res);
         }
-
     } // namespace detail
 
     inline void imshow(const unsigned char *ptr, const int rows, const int columns, const int colors,
@@ -1169,7 +1166,6 @@ namespace matplotlibcpp
         return res;
     }
 
-
     template<typename NumericX, typename NumericY, typename NumericZ>
     bool scatter(const std::vector<NumericX> &x,
                  const std::vector<NumericY> &y,
@@ -1184,25 +1180,23 @@ namespace matplotlibcpp
         // this function is called because I'm not sure that we can assume "matplotlib
         // installed" implies "mpl_toolkits installed" on all platforms, and we don't
         // want to require it for people who don't need 3d plots.
-        static PyObject *mpl_toolkitsmod = nullptr, *axis3dmod = nullptr;
+        static PyObject *mpl_toolkitsmod = nullptr;
+        static PyObject *axis3dmod = nullptr;
         if(!mpl_toolkitsmod)
         {
             detail::_interpreter::get();
 
             PyObject * mpl_toolkits = PyString_FromString("mpl_toolkits");
             PyObject * axis3d = PyString_FromString("mpl_toolkits.mplot3d");
-            if(!mpl_toolkits || !axis3d)
-            { throw std::runtime_error("couldnt create string"); }
+            if(!mpl_toolkits || !axis3d) throw std::runtime_error("couldnt create string");
 
             mpl_toolkitsmod = PyImport_Import(mpl_toolkits);
             Py_DECREF(mpl_toolkits);
-            if(!mpl_toolkitsmod)
-            { throw std::runtime_error("Error loading module mpl_toolkits!"); }
+            if(!mpl_toolkitsmod) throw std::runtime_error("Error loading module mpl_toolkits!");
 
             axis3dmod = PyImport_Import(axis3d);
             Py_DECREF(axis3d);
-            if(!axis3dmod)
-            { throw std::runtime_error("Error loading module mpl_toolkits.mplot3d!"); }
+            if(!axis3dmod) throw std::runtime_error("Error loading module mpl_toolkits.mplot3d!");
         }
 
         assert(x.size() == y.size());
@@ -1272,7 +1266,6 @@ namespace matplotlibcpp
         Py_DECREF(fig);
         if(res) Py_DECREF(res);
         return res;
-
     }
 
     template<typename Numeric>
@@ -1531,8 +1524,7 @@ namespace matplotlibcpp
 
         Py_DECREF(kwargs);
         Py_DECREF(plot_args);
-        if(res)
-            Py_DECREF(res);
+        if(res) Py_DECREF(res);
 
         return res;
     }
@@ -1568,8 +1560,7 @@ namespace matplotlibcpp
 
         Py_DECREF(kwargs);
         Py_DECREF(plot_args);
-        if(res)
-            Py_DECREF(res);
+        if(res) Py_DECREF(res);
 
         return res;
     }
@@ -1661,8 +1652,7 @@ namespace matplotlibcpp
         Py_DECREF(axis);
         Py_DECREF(kwargs);
         Py_DECREF(plot_args);
-        if(res)
-            Py_DECREF(res);
+        if(res) Py_DECREF(res);
 
         return res;
     }
@@ -1688,8 +1678,7 @@ namespace matplotlibcpp
                 detail::_interpreter::get().s_python_function_stem, plot_args);
 
         Py_DECREF(plot_args);
-        if(res)
-            Py_DECREF(res);
+        if(res) Py_DECREF(res);
 
         return res;
     }
@@ -1989,8 +1978,7 @@ namespace matplotlibcpp
     const std::map<std::string, float> &keywords = {}
     )
 {
-    if (mappable == nullptr)
-    throw std::runtime_error("Must call colorbar with PyObject* returned from an image, contour, surface, etc.");
+    if(mappable == nullptr) throw std::runtime_error("Must call colorbar with PyObject* returned from an image, contour, surface, etc.");
 
     detail::_interpreter::get();
 
@@ -2010,6 +1998,7 @@ namespace matplotlibcpp
 
     );
 }
+
 
 PyObject *res = PyObject_Call(detail::_interpreter::get().s_python_function_colorbar, args, kwargs);
 if(!res) throw std::runtime_error("Call to colorbar() failed.");
@@ -2230,7 +2219,6 @@ inline std::array<double, 2> xlim()
     return {PyFloat_AsDouble(left), PyFloat_AsDouble(right)};
 }
 
-
 inline std::array<double, 2> ylim()
 {
     PyObject * args = PyTuple_New(0);
@@ -2358,10 +2346,8 @@ inline void margins(Numeric margin)
     PyObject * args = PyTuple_New(1);
     PyTuple_SetItem(args, 0, PyFloat_FromDouble(margin));
 
-    PyObject * res =
-            PyObject_CallObject(detail::_interpreter::get().s_python_function_margins, args);
-    if(!res)
-        throw std::runtime_error("Call to margins() failed.");
+    PyObject * res = PyObject_CallObject(detail::_interpreter::get().s_python_function_margins, args);
+    if(!res) throw std::runtime_error("Call to margins() failed.");
 
     Py_DECREF(args);
     Py_DECREF(res);
@@ -2375,10 +2361,8 @@ inline void margins(Numeric margin_x, Numeric margin_y)
     PyTuple_SetItem(args, 0, PyFloat_FromDouble(margin_x));
     PyTuple_SetItem(args, 1, PyFloat_FromDouble(margin_y));
 
-    PyObject * res =
-            PyObject_CallObject(detail::_interpreter::get().s_python_function_margins, args);
-    if(!res)
-        throw std::runtime_error("Call to margins() failed.");
+    PyObject * res = PyObject_CallObject(detail::_interpreter::get().s_python_function_margins, args);
+    if(!res) throw std::runtime_error("Call to margins() failed.");
 
     Py_DECREF(args);
     Py_DECREF(res);
@@ -2737,7 +2721,6 @@ inline void show(const bool block = true)
         Py_DECREF(kwargs);
     }
 
-
     if(!res) throw std::runtime_error("Call to show() failed.");
 
     Py_DECREF(res);
@@ -2760,16 +2743,14 @@ inline void xkcd()
 {
     detail::_interpreter::get();
 
-    PyObject * res;
     PyObject * kwargs = PyDict_New();
 
-    res = PyObject_Call(detail::_interpreter::get().s_python_function_xkcd,
+    PyObject *res = PyObject_Call(detail::_interpreter::get().s_python_function_xkcd,
                         detail::_interpreter::get().s_python_empty_tuple, kwargs);
 
     Py_DECREF(kwargs);
 
-    if(!res)
-        throw std::runtime_error("Call to show() failed.");
+    if(!res) throw std::runtime_error("Call to show() failed.");
 
     Py_DECREF(res);
 }
@@ -2813,10 +2794,7 @@ inline void save(const std::string &filename, const int dpi = 0)
 
     PyObject * kwargs = PyDict_New();
 
-    if(dpi > 0)
-    {
-        PyDict_SetItemString(kwargs, "dpi", PyLong_FromLong(dpi));
-    }
+    if(dpi > 0) PyDict_SetItemString(kwargs, "dpi", PyLong_FromLong(dpi));
 
     PyObject * res = PyObject_Call(detail::_interpreter::get().s_python_function_save, args, kwargs);
     if(!res) throw std::runtime_error("Call to save() failed.");
@@ -2836,7 +2814,8 @@ inline void rcparams(const std::map<std::string, std::string> &keywords = {})
     {
         if("text.usetex" == it->first)
             PyDict_SetItemString(kwargs, it->first.c_str(), PyLong_FromLong(std::stoi(it->second.c_str())));
-        else PyDict_SetItemString(kwargs, it->first.c_str(), PyString_FromString(it->second.c_str()));
+        else
+            PyDict_SetItemString(kwargs, it->first.c_str(), PyString_FromString(it->second.c_str()));
     }
 
     PyObject * update = PyObject_GetAttrString(detail::_interpreter::get().s_python_function_rcparams, "update");
@@ -2868,8 +2847,7 @@ inline void cla()
     PyObject * res = PyObject_CallObject(detail::_interpreter::get().s_python_function_cla,
                                          detail::_interpreter::get().s_python_empty_tuple);
 
-    if(!res)
-        throw std::runtime_error("Call to cla() failed.");
+    if(!res) throw std::runtime_error("Call to cla() failed.");
 
     Py_DECREF(res);
 }
@@ -3102,8 +3080,7 @@ public:
         assert(x.size() == y.size());
 
         PyObject * kwargs = PyDict_New();
-        if(name != "")
-            PyDict_SetItemString(kwargs, "label", PyString_FromString(name.c_str()));
+        if(name != "") PyDict_SetItemString(kwargs, "label", PyString_FromString(name.c_str()));
 
         PyObject * xarray = detail::get_array(x);
         PyObject * yarray = detail::get_array(y);
@@ -3186,10 +3163,8 @@ private:
 
     void decref()
     {
-        if(line)
-            Py_DECREF(line);
-        if(set_data_fct)
-            Py_DECREF(set_data_fct);
+        if(line) Py_DECREF(line);
+        if(set_data_fct) Py_DECREF(set_data_fct);
     }
 
 
